@@ -12,6 +12,7 @@ import { readDownloadToken } from "./helpers/downloadToken";
 import { getSignedInUser } from "../auth/helpers/signedInUser";
 import { requireSignedIn } from "../auth/middleware/requireSignedIn";
 import { streamFileDownload } from "./services/streamFileDownload";
+import { createFolder } from "./services/createFolder";
 
 function readQueryString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
@@ -123,3 +124,18 @@ storageRoutes.post("/upload-url", requireSignedIn, async (req, res) => {
 function readAssetType(value: unknown): AssetType | undefined {
   return value === "characterSheets" || value === "props" ? value : undefined;
 }
+
+// POST /api/storage/folders  { parent, name }  -> signed-in people only
+storageRoutes.post("/folders", requireSignedIn, async (req, res) => {
+  try {
+    res.status(201).json(
+      await createFolder({
+        parent: readQueryString(req.body?.parent) ?? "",
+        name: readQueryString(req.body?.name)?.trim() ?? "",
+      })
+    );
+  } catch (error) {
+    if (!(error instanceof UploadError)) throw error;
+    res.status(error.status).json({ error: error.message });
+  }
+});

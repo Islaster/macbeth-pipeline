@@ -11,6 +11,7 @@ export function useFolderContents(folder: string) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadCount, setReloadCount] = useState(0); // bumped to fetch the folder again
 
   useEffect(() => {
     let isCurrent = true; // ignore results from a folder we've already left
@@ -37,7 +38,7 @@ export function useFolderContents(folder: string) {
     return () => {
       isCurrent = false;
     };
-  }, [folder]);
+  }, [folder, reloadCount]);
 
   async function loadMore() {
     if (!nextCursor) return;
@@ -53,5 +54,9 @@ export function useFolderContents(folder: string) {
     }
   }
 
-  return { folders, files, nextCursor, isLoading, error, loadMore };
+  function reload() {
+    setReloadCount((count) => count + 1);
+  }
+
+  return { folders, files, nextCursor, isLoading, error, loadMore, reload };
 }

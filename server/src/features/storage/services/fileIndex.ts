@@ -6,6 +6,7 @@ import {
   saveCachedIndex,
   type BucketContents,
 } from "./fileIndexCache";
+import { lastPathSegment } from "../helpers/toStoredFile";
 
 let indexed: BucketContents = { files: [], folders: [] };
 let isReady = false;
@@ -53,4 +54,12 @@ export function startFileIndexRefresh(): void {
 
 export function getFileIndex(): BucketContents & { isReady: boolean } {
   return { ...indexed, isReady };
+}
+
+// Adds a folder this app just created, without waiting for the next crawl.
+export function rememberNewFolder(path: string): void {
+  if (indexed.folders.some((folder) => folder.path === path)) return;
+  const folders = [...indexed.folders, { path, name: lastPathSegment(path) }];
+  folders.sort((a, b) => (a.path < b.path ? -1 : 1));
+  indexed = { ...indexed, folders };
 }

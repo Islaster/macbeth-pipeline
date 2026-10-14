@@ -4,6 +4,7 @@ import type {
   StorageSearchResults,
   AssetType,
   StoredFile,
+  StoredFolder,
 } from "../../../../../shared/types/storedFile";
 
 interface SearchScope {
@@ -57,4 +58,25 @@ export function getThumbnailUrl(file: StoredFile): string {
     key: file.key,
     v: file.lastModified,
   })}`;
+}
+
+// Creates a folder inside `parent` ("" for the top level). Throws with the server's reason when refused.
+export async function createFolder(
+  parent: string,
+  name: string
+): Promise<StoredFolder> {
+  const response = await fetch("/api/storage/folders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ parent, name }),
+  });
+  if (!response.ok) {
+    const refusal = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+    throw new Error(
+      refusal?.error ?? `The folder could not be created (${response.status})`
+    );
+  }
+  return (await response.json()) as StoredFolder;
 }

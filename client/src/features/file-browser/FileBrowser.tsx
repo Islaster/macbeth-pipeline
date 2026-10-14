@@ -21,6 +21,7 @@ import { UploadTray } from "./components/UploadTray";
 import { UploadsContext } from "./helpers/uploads";
 import { usePreventStrayFileDrops, useUploads } from "./hooks/useUploads";
 import { NamingConventionModal } from "./components/NamingConventionModal";
+import { NewFolderButton } from "./components/NewFolderButton";
 import "./fileBrowser.css";
 
 export function FileBrowser() {
@@ -99,7 +100,18 @@ export function FileBrowser() {
           />
 
           <main className="file-browser__main">
-            <FolderBreadcrumbs folder={folder} onNavigate={openFolder} />
+            <div className="file-browser__location">
+              <FolderBreadcrumbs folder={folder} onNavigate={openFolder} />
+              {!isSearching && (
+                <NewFolderButton
+                  parentPath={folder}
+                  parentName={
+                    folder.split("/").filter(Boolean).pop() ?? "All files"
+                  }
+                  onCreated={browse.reload}
+                />
+              )}
+            </div>
             <div className="file-browser__toolbar">
               <SearchBar
                 filters={filters}

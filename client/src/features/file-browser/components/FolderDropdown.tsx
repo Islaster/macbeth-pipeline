@@ -7,6 +7,7 @@ import type { FileKindFilter } from "../helpers/fileFilters";
 import { useUploadFiles } from "../hooks/useUploads";
 import { AddFilesButton } from "./AddFilesButton";
 import { FolderDropdownContents } from "./FolderDropdownContents";
+import { NewFolderButton } from "./NewFolderButton";
 
 interface FolderDropdownProps {
   folder: StoredFolder;
@@ -48,6 +49,11 @@ export function FolderDropdown({
     setIsOpen(true);
     await uploadFiles(folder.path, files);
     setReloadCount((count) => count + 1); // reload the contents so the new files appear
+  }
+
+  function showNewFolder() {
+    setIsOpen(true);
+    setReloadCount((count) => count + 1);
   }
 
   return (
@@ -103,6 +109,11 @@ export function FolderDropdown({
         <AddFilesButton
           label={`Add files to ${folder.name}`}
           onFilesChosen={(files) => void addFiles(files)}
+        />
+        <NewFolderButton
+          parentPath={folder.path}
+          parentName={folder.name}
+          onCreated={showNewFolder}
         />
       </div>
 

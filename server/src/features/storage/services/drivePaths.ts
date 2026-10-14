@@ -20,9 +20,13 @@ async function findChild(
   kind: "folder" | "file",
   fields = "id,name"
 ): Promise<drive_v3.Schema$File | null> {
-  const typeFilter = `mimeType ${kind === "folder" ? "=" : "!="} '${folderMimeType}'`;
+  const typeFilter = `mimeType ${
+    kind === "folder" ? "=" : "!="
+  } '${folderMimeType}'`;
   const response = await driveClient.files.list({
-    q: `'${parentId}' in parents and name = '${escapeForQuery(name)}' and ${typeFilter} and trashed = false`,
+    q: `'${parentId}' in parents and name = '${escapeForQuery(
+      name
+    )}' and ${typeFilter} and trashed = false`,
     fields: `files(${fields})`,
     orderBy: "modifiedTime desc", // Drive allows same-named items; the newest wins
     ...sharedDriveOptions,
@@ -69,4 +73,9 @@ export async function findFile(
 export function rememberFolderIds(idsByPath: Map<string, string>): void {
   folderIds.clear();
   for (const [path, id] of idsByPath) folderIds.set(path, Promise.resolve(id));
+}
+
+// For a folder this app just created.
+export function rememberFolderId(path: string, id: string): void {
+  folderIds.set(path, Promise.resolve(id));
 }
