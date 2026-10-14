@@ -1,0 +1,83 @@
+/* Shared by every feature. This file loads first, so feature files build on it. */
+
+/* Theme */
+:root {
+  --surface: #16181d;
+  --surface-raised: #20232b;
+  --border: #2f333d;
+  --text: #e8eaf0;
+  --text-muted: #9097a6;
+  --accent: #7c9cff;
+  --danger: #ff8a8a;
+  --radius: 6px;
+  --radius-large: 8px;
+}
+
+/* Base elements */
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* App layout */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Full-height side panels: the navbar and the filter sidebar */
+.navbar,
+.filter-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-right: 1px solid var(--border);
+}
+
+/* Forms */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.text-input {
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+}
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.primary-button {
+  padding: 9px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #10131a;
+  font-weight: 600;
+}
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.form-error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+}

@@ -1,0 +1,90 @@
+/* Navigation only. Theme, base styles, and the side-panel rule come from index.css. */
+
+.navbar {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  padding: 16px 10px;
+  background: var(--surface);
+  transition: width 0.15s;
+}
+.navbar--collapsed {
+  width: 56px;
+}
+
+.navbar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  margin-bottom: 16px;
+}
+.navbar--collapsed .navbar__header {
+  justify-content: center;
+}
+.navbar__title {
+  padding-left: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.navbar__toggle {
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+.navbar__toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.navbar__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navbar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+.navbar--collapsed .navbar__item {
+  justify-content: center;
+}
+.navbar__item:hover {
+  background: var(--surface-raised);
+}
+.navbar__item--active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.navbar__footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.navbar__user {
+  margin: 0 0 8px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+.navbar__user-role {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}

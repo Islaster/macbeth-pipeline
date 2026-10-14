@@ -1,0 +1,24 @@
+# Secrets: Google refresh token, download link secret, database details
+.env
+.env.*
+!.env.example
+
+# Installed packages
+node_modules/
+
+# Compiled output (if the build writes it)
+dist/
+build/
+
+# Caches the server writes at runtime: file index, thumbnails, kept-versions record
+.cache/
+
+# A SQLite database, if that's what the auth feature uses
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# Logs and editor/OS noise
+*.log
+.DS_Store
