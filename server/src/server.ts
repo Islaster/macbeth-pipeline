@@ -1,5 +1,6 @@
 import { app } from "./app";
 import { startFileIndexRefresh } from "./features/storage/services/fileIndex";
+import { applySchema } from "./database/applySchema";
 import path from "node:path";
 import * as express from "express";
 
@@ -16,7 +17,13 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(port, () => {
-  console.log(`Pipeline API running at http://localhost:${port}`);
-  startFileIndexRefresh();
-});
+applySchema()
+  .then(() => {
+    app.listen(Number(process.env.PORT) || 3000, () => {
+      console.log("Server is running");
+    });
+  })
+  .catch((error: unknown) => {
+    console.error("Could not set up the database:", error);
+    process.exit(1);
+  });
