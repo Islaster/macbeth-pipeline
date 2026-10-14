@@ -7,6 +7,7 @@ import {
 } from "../helpers/fileNameDetails";
 import { formatFileSize } from "../helpers/formatFileSize";
 import { useViewMode } from "../hooks/useViewMode";
+import { getDraggableDownloadProps } from "../helpers/draggableDownload";
 
 interface FileRowProps {
   file: StoredFile;
@@ -27,6 +28,7 @@ export function FileRow({
       type="button"
       className={`file-row${isSelected ? " file-row--selected" : ""}`}
       onClick={() => onSelect(file)}
+      {...getDraggableDownloadProps(file)}
     >
       <span
         className={`file-row__kind file-row__kind--${getFileKind(file.name)}`}

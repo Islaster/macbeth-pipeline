@@ -27,8 +27,13 @@ export function fetchFolderContents(
   return getJson<StoredFilePage>(`/api/storage/files?${params}`);
 }
 
-export async function fetchDownloadUrl(key: string): Promise<string> {
+// save: true gives a link the browser saves to disk instead of opening in the tab.
+export async function fetchDownloadUrl(
+  key: string,
+  options: { save?: boolean } = {}
+): Promise<string> {
   const params = new URLSearchParams({ key });
+  if (options.save) params.set("save", "1");
   const { url } = await getJson<{ url: string }>(
     `/api/storage/download-url?${params}`
   );

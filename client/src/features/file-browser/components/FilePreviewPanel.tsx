@@ -7,6 +7,7 @@ import {
 } from "../helpers/fileNameDetails";
 import { formatFileSize } from "../helpers/formatFileSize";
 import { fetchDownloadUrl } from "../api/storageApi";
+import { downloadFile } from "../helpers/downloadLinks";
 
 interface FilePreviewPanelProps {
   file: StoredFile;
@@ -21,6 +22,14 @@ export function FilePreviewPanel({
 }: FilePreviewPanelProps) {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const kind = getFileKind(file.name);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  function startDownload() {
+    setDownloadError(null);
+    downloadFile(file.key).catch(() => {
+      setDownloadError("The download couldn't start. Try again in a moment.");
+    });
+  }
 
   useEffect(() => {
     let isCurrent = true;
@@ -65,6 +74,9 @@ export function FilePreviewPanel({
       </dl>
 
       <div className="preview-panel__actions">
+        <button type="button" onClick={startDownload}>
+          ⬇
+        </button>
         {fileUrl && (
           <a href={fileUrl} target="_blank" rel="noreferrer">
             Open full size
@@ -83,6 +95,7 @@ export function FilePreviewPanel({
           Show in folder
         </button>
       </div>
+      {downloadError && <p className="form-error">{downloadError}</p>}
     </aside>
   );
 }

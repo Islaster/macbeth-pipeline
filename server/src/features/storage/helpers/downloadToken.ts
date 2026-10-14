@@ -5,6 +5,7 @@ export interface DownloadLink {
   fileId: string;
   revisionId?: string;
   name: string;
+  asAttachment?: boolean;
 }
 
 const secret =

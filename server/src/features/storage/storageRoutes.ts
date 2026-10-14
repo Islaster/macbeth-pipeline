@@ -35,14 +35,14 @@ storageRoutes.get("/versions", async (req, res) => {
   res.json(await listFileVersions(key));
 });
 
-// GET /api/storage/download-url?key=...&versionId=...
+// GET /api/storage/download-url?key=...&versionId=...&save=1  (save=1: download instead of open)
 storageRoutes.get("/download-url", async (req, res) => {
   const key = readQueryString(req.query.key);
   if (!key) return res.status(400).json({ error: "key is required" });
-  const url = await getFileDownloadUrl(
-    key,
-    readQueryString(req.query.versionId)
-  );
+  const url = await getFileDownloadUrl(key, {
+    versionId: readQueryString(req.query.versionId),
+    asAttachment: req.query.save === "1",
+  });
   if (!url) return res.status(404).json({ error: "File not found" });
   res.json({ url });
 });

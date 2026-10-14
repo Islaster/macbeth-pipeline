@@ -43,9 +43,10 @@ export async function streamFileDownload(
     const value = readHeader(driveResponse.headers, header);
     if (value) res.set(header, value);
   }
+  const disposition = link.asAttachment ? "attachment" : "inline";
   res.set(
     "Content-Disposition",
-    `inline; filename*=UTF-8''${encodeFileName(link.name)}`
+    `${disposition}; filename*=UTF-8''${encodeFileName(link.name)}`
   );
 
   // A closed tab or cancelled download ends the stream early; that isn't an error.

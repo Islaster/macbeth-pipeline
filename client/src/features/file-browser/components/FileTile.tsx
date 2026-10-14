@@ -2,6 +2,7 @@ import type { StoredFile } from "../../../../../shared/types/storedFile";
 import { getFolderPath, getVersionLabel } from "../helpers/fileNameDetails";
 import { formatFileSize } from "../helpers/formatFileSize";
 import { FileThumbnail } from "./FileThumbnail";
+import { getDraggableDownloadProps } from "../helpers/draggableDownload";
 
 interface FileTileProps {
   file: StoredFile;
@@ -24,6 +25,7 @@ export function FileTile({
       className={`file-tile${isSelected ? " file-tile--selected" : ""}`}
       title={showLocation ? file.key : file.name}
       onClick={() => onSelect(file)}
+      {...getDraggableDownloadProps(file)}
     >
       <FileThumbnail file={file} />
       <span className="file-tile__name">{file.name}</span>
