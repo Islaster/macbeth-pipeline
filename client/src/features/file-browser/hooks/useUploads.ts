@@ -9,6 +9,7 @@ import {
   type UploadFiles,
   type UploadItem,
 } from "../helpers/uploads";
+import { embedArtist } from "../metadata/embedArtist";
 
 // Owns the list of uploads. Used once, in FileBrowser.
 export function useUploads() {
@@ -32,9 +33,11 @@ export function useUploads() {
     ]);
 
     try {
-      const uploadUrl = await requestUploadUrl(folder, file);
+      const { uploadUrl, artist } = await requestUploadUrl(folder, file);
+      // The upload is accepted, so write the artist into the file before it goes to Drive.
+      const taggedFile = await embedArtist(file, artist);
       let lastPercent = 0;
-      await sendFileToStorage(uploadUrl, file, (percent) => {
+      await sendFileToStorage(uploadUrl, taggedFile, (percent) => {
         if (percent === lastPercent) return; // only redraw when the number changes
         lastPercent = percent;
         updateUpload(id, { percent });

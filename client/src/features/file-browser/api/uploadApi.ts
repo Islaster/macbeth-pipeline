@@ -10,10 +10,15 @@ export class UploadRefused extends Error {
   }
 }
 
+export interface AcceptedUpload {
+  uploadUrl: string;
+  artist: string; // the signed-in person's name, as the server knows it
+}
+
 export async function requestUploadUrl(
   folder: string,
   file: File
-): Promise<string> {
+): Promise<AcceptedUpload> {
   const response = await fetch("/api/storage/upload-url", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -30,13 +35,14 @@ export async function requestUploadUrl(
       refusal?.code === "naming" ? "naming" : "other"
     );
   }
-  return ((await response.json()) as { uploadUrl: string }).uploadUrl;
+  const { uploadUrl, artist } = (await response.json()) as AcceptedUpload;
+  return { uploadUrl, artist };
 }
 
 // Sends the file straight to storage. XMLHttpRequest is used because it reports progress.
 export function sendFileToStorage(
   uploadUrl: string,
-  file: File,
+  file: Blob,
   onProgress: (percent: number) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {

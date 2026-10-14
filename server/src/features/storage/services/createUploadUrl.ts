@@ -52,7 +52,6 @@ async function startDriveUpload(
     method: existingFileId ? "PATCH" : "POST",
     headers: {
       "Content-Type": "application/json; charset=UTF-8",
-      "X-Upload-Content-Length": String(request.sizeBytes),
       ...(request.origin ? { Origin: request.origin } : {}),
     },
     body: JSON.stringify(
@@ -68,9 +67,12 @@ async function startDriveUpload(
 }
 
 // Returns a temporary link the browser can upload one file to (with a PUT, as before).
-export async function createUploadUrl(
-  request: UploadRequest
-): Promise<{ uploadUrl: string; key: string; isNewVersion: boolean }> {
+export async function createUploadUrl(request: UploadRequest): Promise<{
+  uploadUrl: string;
+  key: string;
+  isNewVersion: boolean;
+  artist: string;
+}> {
   const { folder, fileName, sizeBytes } = request;
 
   if (!isValidFolder(folder))
@@ -100,5 +102,6 @@ export async function createUploadUrl(
     uploadUrl: await startDriveUpload(request, folderId, existingFileId),
     key,
     isNewVersion: existingFileId !== undefined,
+    artist: request.artist,
   };
 }
