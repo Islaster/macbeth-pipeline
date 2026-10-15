@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { StoredFolder } from "../../../../../shared/types/storedFile";
 import { fetchFolderContents } from "../api/storageApi";
+import { affectsFolder, subscribeToStorageEvents } from "../api/storageEvents";
 
 // Each folder directly inside Scene_Bin/ is one sequence,
 // e.g. "Scene_Bin/006_(HKA)_HONG_KONG_ATTACK/".
@@ -19,7 +20,16 @@ async function fetchAllSequences(): Promise<StoredFolder[]> {
 
 export function useSequences(): StoredFolder[] {
   const [sequences, setSequences] = useState<StoredFolder[]>([]);
+  const [version, setVersion] = useState(0); // bumped when the sequences folder changes
 
+  useEffect(
+    () =>
+      subscribeToStorageEvents((event) => {
+        if (affectsFolder(event, sequencesFolder))
+          setVersion((current) => current + 1);
+      }),
+    []
+  );
   useEffect(() => {
     let isCurrent = true;
     fetchAllSequences()
@@ -32,7 +42,7 @@ export function useSequences(): StoredFolder[] {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [version]);
 
   return sequences;
 }

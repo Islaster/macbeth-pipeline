@@ -1,6 +1,8 @@
 import { storageConfig } from "../config/storageConfig";
 import { crawlDrive } from "./crawlDrive";
-import { rememberFolderIds } from "./drivePaths";
+import { rememberFileIds, rememberFolderIds } from "./drivePaths";
+import { broadcastStorageEvent } from "./storageEvents";
+
 import {
   loadCachedIndex,
   saveCachedIndex,
@@ -20,14 +22,17 @@ export async function refreshFileIndex(): Promise<void> {
     indexed = crawl.contents;
     isReady = true;
     rememberFolderIds(crawl.folderIds);
+    rememberFileIds(crawl.fileIds);
     console.log(
       `File index ready: ${indexed.files.length} files, ${indexed.folders.length} folders`
     );
     await saveCachedIndex(indexed);
+    broadcastStorageEvent({ type: "index" });
   } finally {
     isRefreshing = false;
   }
 }
+let scheduledRefresh: ReturnType<typeof setTimeout> | null = null;
 
 // Uses the last saved index right away, then updates it from Drive in the background.
 export function startFileIndexRefresh(): void {
@@ -62,4 +67,14 @@ export function rememberNewFolder(path: string): void {
   const folders = [...indexed.folders, { path, name: lastPathSegment(path) }];
   folders.sort((a, b) => (a.path < b.path ? -1 : 1));
   indexed = { ...indexed, folders };
+}
+
+export function scheduleFileIndexRefresh(): void {
+  if (scheduledRefresh) clearTimeout(scheduledRefresh);
+  scheduledRefresh = setTimeout(() => {
+    scheduledRefresh = null;
+    refreshFileIndex().catch((error: unknown) => {
+      console.error("File index refresh failed:", error);
+    });
+  }, storageConfig.indexRefreshAfterChangeSeconds * 1000);
 }

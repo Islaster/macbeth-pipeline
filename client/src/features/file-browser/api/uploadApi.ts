@@ -66,3 +66,12 @@ export function sendFileToStorage(
     request.send(file);
   });
 }
+
+// Tells the server the file has landed, so everyone else's view updates.
+export async function reportUploadFinished(key: string): Promise<void> {
+  await fetch("/api/storage/uploaded", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key }),
+  });
+}

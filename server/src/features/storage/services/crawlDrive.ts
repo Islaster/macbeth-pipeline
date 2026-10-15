@@ -16,6 +16,7 @@ import type { BucketContents } from "./fileIndexCache";
 export interface DriveCrawl {
   contents: BucketContents;
   folderIds: Map<string, string>; // folder path -> Drive ID
+  fileIds: Map<string, string>; // file key -> Drive ID
 }
 
 const foldersPerRequest = 40; // keeps the search text Drive receives short enough
@@ -47,6 +48,7 @@ async function listChildrenOf(
 export async function crawlDrive(): Promise<DriveCrawl> {
   const files: StoredFile[] = [];
   const folderIds = new Map<string, string>();
+  const fileIds = new Map<string, string>();
   const pathById = new Map([[storageConfig.rootFolderId, ""]]);
   let level = [storageConfig.rootFolderId];
 
@@ -63,7 +65,10 @@ export async function crawlDrive(): Promise<DriveCrawl> {
 
         if (child.mimeType !== folderMimeType) {
           const file = toStoredFile(child, parentPath);
-          if (file) files.push(file);
+          if (file) {
+            files.push(file);
+            fileIds.set(file.key, child.id);
+          }
           continue;
         }
 
@@ -82,5 +87,5 @@ export async function crawlDrive(): Promise<DriveCrawl> {
     .sort()
     .map((path) => ({ path, name: lastPathSegment(path) }));
 
-  return { contents: { files, folders }, folderIds };
+  return { contents: { files, folders }, folderIds, fileIds };
 }

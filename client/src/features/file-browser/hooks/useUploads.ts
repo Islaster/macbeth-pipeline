@@ -3,6 +3,7 @@ import {
   requestUploadUrl,
   sendFileToStorage,
   UploadRefused,
+  reportUploadFinished,
 } from "../api/uploadApi";
 import {
   UploadsContext,
@@ -43,6 +44,7 @@ export function useUploads() {
         updateUpload(id, { percent });
       });
       updateUpload(id, { percent: 100, status: "done" });
+      reportUploadFinished(`${folder}${file.name}`).catch(() => undefined);
     } catch (cause) {
       if (cause instanceof UploadRefused && cause.code === "naming") {
         setNamingHelpFor(file.name);

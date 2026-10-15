@@ -4,6 +4,7 @@ import { isValidFolderName, isValidFolderPath } from "../helpers/folderNames";
 import { UploadError } from "../helpers/UploadError";
 import { findFolderId, rememberFolderId } from "./drivePaths";
 import { rememberNewFolder } from "./fileIndex";
+import { broadcastStorageEvent } from "./storageEvents";
 
 interface NewFolderRequest {
   parent: string; // "" for the top level, otherwise ends with "/"
@@ -39,5 +40,6 @@ export async function createFolder(
 
   rememberFolderId(path, id); // so uploads into it work straight away
   rememberNewFolder(path); // so folder search sees it before the next crawl
+  broadcastStorageEvent({ type: "folders", folders: [parent] });
   return { path, name };
 }

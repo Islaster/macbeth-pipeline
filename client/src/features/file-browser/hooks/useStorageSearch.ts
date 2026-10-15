@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { StorageSearchResults } from "../../../../../shared/types/storedFile";
 import { searchStorage } from "../api/storageApi";
 import type { FileFilters } from "../helpers/fileFilters";
+import { subscribeToStorageEvents } from "../api/storageEvents";
 
 const searchDelayMs = 250; // wait for a pause in typing before asking the server
 const indexRetryDelayMs = 3000; // how often to ask again while the server reads storage
@@ -16,6 +17,7 @@ export function useStorageSearch(filters: FileFilters) {
   const [results, setResults] = useState<StorageSearchResults>(noResults);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [indexVersion, setIndexVersion] = useState(0); // bumped when the server rebuilds its index
 
   const query = filters.searchText.trim();
   const target = filters.searchTarget;
@@ -24,6 +26,14 @@ export function useStorageSearch(filters: FileFilters) {
   const assetType = target === "files" ? filters.assetType : null;
   const isActive =
     query.length > 0 || withinFolder !== null || assetType !== null;
+
+  useEffect(
+    () =>
+      subscribeToStorageEvents((event) => {
+        if (event.type === "index") setIndexVersion((version) => version + 1);
+      }),
+    []
+  );
 
   useEffect(() => {
     if (!isActive) {
@@ -62,7 +72,6 @@ export function useStorageSearch(filters: FileFilters) {
       isCurrent = false;
       clearTimeout(timer);
     };
-  }, [isActive, query, target, withinFolder, assetType]);
-
+  }, [isActive, query, target, withinFolder, assetType, indexVersion]);
   return { results, isSearching, error, isActive };
 }

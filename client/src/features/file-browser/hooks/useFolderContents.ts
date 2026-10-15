@@ -4,6 +4,7 @@ import type {
   StoredFolder,
 } from "../../../../../shared/types/storedFile";
 import { fetchFolderContents } from "../api/storageApi";
+import { affectsFolder, subscribeToStorageEvents } from "../api/storageEvents";
 
 export function useFolderContents(folder: string) {
   const [folders, setFolders] = useState<StoredFolder[]>([]);
@@ -11,11 +12,12 @@ export function useFolderContents(folder: string) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reloadCount, setReloadCount] = useState(0); // bumped to fetch the folder again
+  // Bumped to fetch the folder again. Quiet reloads keep the current list on screen.
+  const [reload, setReload] = useState({ count: 0, isQuiet: false });
 
   useEffect(() => {
     let isCurrent = true; // ignore results from a folder we've already left
-    setIsLoading(true);
+    if (!reload.isQuiet) setIsLoading(true);
     setError(null);
 
     fetchFolderContents(folder)
@@ -38,7 +40,17 @@ export function useFolderContents(folder: string) {
     return () => {
       isCurrent = false;
     };
-  }, [folder, reloadCount]);
+  }, [folder, reload]);
+
+  // Someone else changed this folder: fetch it again without a loading flash.
+  useEffect(
+    () =>
+      subscribeToStorageEvents((event) => {
+        if (affectsFolder(event, folder))
+          setReload((current) => ({ count: current.count + 1, isQuiet: true }));
+      }),
+    [folder]
+  );
 
   async function loadMore() {
     if (!nextCursor) return;
@@ -54,9 +66,14 @@ export function useFolderContents(folder: string) {
     }
   }
 
-  function reload() {
-    setReloadCount((count) => count + 1);
-  }
-
-  return { folders, files, nextCursor, isLoading, error, loadMore, reload };
+  return {
+    folders,
+    files,
+    nextCursor,
+    isLoading,
+    error,
+    loadMore,
+    reload: () =>
+      setReload((current) => ({ count: current.count + 1, isQuiet: false })),
+  };
 }

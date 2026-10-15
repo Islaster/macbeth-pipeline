@@ -13,6 +13,11 @@ import { getSignedInUser } from "../auth/helpers/signedInUser";
 import { requireSignedIn } from "../auth/middleware/requireSignedIn";
 import { streamFileDownload } from "./services/streamFileDownload";
 import { createFolder } from "./services/createFolder";
+import { scheduleFileIndexRefresh } from "./services/fileIndex";
+import {
+  addEventClient,
+  broadcastStorageEvent,
+} from "./services/storageEvents";
 
 function readQueryString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
@@ -138,4 +143,24 @@ storageRoutes.post("/folders", requireSignedIn, async (req, res) => {
     if (!(error instanceof UploadError)) throw error;
     res.status(error.status).json({ error: error.message });
   }
+});
+
+// GET /api/storage/events  -> a stream of live updates (server-sent events)
+storageRoutes.get("/events", (_req, res) => {
+  addEventClient(res);
+});
+
+// POST /api/storage/uploaded  { key }  -> the browser finished sending a file to Drive
+storageRoutes.post("/uploaded", requireSignedIn, (req, res) => {
+  const key = readQueryString(req.body?.key);
+  if (!key) {
+    res.status(400).json({ error: "key is required" });
+    return;
+  }
+  broadcastStorageEvent({
+    type: "folders",
+    folders: [key.slice(0, key.lastIndexOf("/") + 1)],
+  });
+  scheduleFileIndexRefresh();
+  res.status(204).end();
 });

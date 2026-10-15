@@ -21,4 +21,7 @@ export const storageConfig = {
   thumbnailMaxSourceBytes: 150 * 1024 * 1024, // skip originals bigger than 150 MB
   thumbnailExtensions: ["png", "jpg", "jpeg", "webp", "gif"],
   maxUploadBytes: 5 * 1024 ** 3, // 5 GB, kept from the S3 setup (Drive itself allows more)
+  driveChangesPollSeconds: 15, // how often to ask Drive what changed
+  indexRefreshAfterChangeSeconds: 5, // wait for a burst of changes to end before re-crawling
+  eventsKeepAliveSeconds: 25, // keeps live-update connections open through proxies
 };

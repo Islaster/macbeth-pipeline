@@ -9,6 +9,10 @@ import { storageConfig } from "../config/storageConfig";
 // Drive finds things by ID, the app by path ("Assets/Characters/sheet.png").
 // This file turns paths into IDs, remembering folders so each is looked up once.
 const folderIds = new Map<string, Promise<string | null>>();
+const folderPathsById = new Map<string, string>([
+  [storageConfig.rootFolderId, ""],
+]);
+const fileKeysById = new Map<string, string>();
 
 function escapeForQuery(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -69,13 +73,34 @@ export async function findFile(
   return findChild(folderId, key.slice(slashIndex + 1), "file", fields);
 }
 
-// Called after each full crawl, so renamed or moved folders are picked up.
-export function rememberFolderIds(idsByPath: Map<string, string>): void {
-  folderIds.clear();
-  for (const [path, id] of idsByPath) folderIds.set(path, Promise.resolve(id));
-}
-
 // For a folder this app just created.
 export function rememberFolderId(path: string, id: string): void {
   folderIds.set(path, Promise.resolve(id));
+  folderPathsById.set(id, path);
+}
+
+// Called after each full crawl, so renamed or moved folders are picked up.
+export function rememberFolderIds(idsByPath: Map<string, string>): void {
+  folderIds.clear();
+  folderPathsById.clear();
+  folderPathsById.set(storageConfig.rootFolderId, "");
+  for (const [path, id] of idsByPath) {
+    folderIds.set(path, Promise.resolve(id));
+    folderPathsById.set(id, path);
+  }
+}
+
+export function rememberFileIds(idsByKey: Map<string, string>): void {
+  fileKeysById.clear();
+  for (const [key, id] of idsByKey) fileKeysById.set(id, key);
+}
+
+// Drive ID -> this app's folder path ("" for the root), or null when it isn't in our tree.
+export function findFolderPath(folderId: string): string | null {
+  return folderPathsById.get(folderId) ?? null;
+}
+
+// Drive ID -> this app's file key, or null when the file isn't known.
+export function findFileKey(fileId: string): string | null {
+  return fileKeysById.get(fileId) ?? null;
 }
